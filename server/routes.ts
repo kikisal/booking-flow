@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { insertBookingSchema } from "@shared/schema";
 import { z } from "zod";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export function registerRoutes(app: Express) {
   // Get all rooms
   app.get("/api/rooms", async (req, res) => {
     try {

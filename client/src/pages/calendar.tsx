@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarGrid } from "@/components/calendar/calendar-grid";
 import { BookingModal } from "@/components/calendar/booking-modal";
@@ -45,11 +45,9 @@ export default function Calendar() {
   };
 
   const handleDatesSelected = (dates: string[]) => {
-    console.log("🟡 Dates selected in calendar page:", dates, "Length:", dates.length);
+    
     setSelectedDates(dates);
-    console.log("🟡 Calendar page state updated, selectedDates now:", dates);
     if (dates.length > 0) {
-      console.log("🟡 Opening booking modal with dates:", dates);
       setShowBookingModal(true);
     }
   };
@@ -69,6 +67,10 @@ export default function Calendar() {
     month: 'long', 
     year: 'numeric' 
   });
+
+  useEffect(() => {
+    refetchBookings();
+  }, [currentDate]);
 
   return (
     <div className="min-h-screen bg-slate-50" data-testid="calendar-page">

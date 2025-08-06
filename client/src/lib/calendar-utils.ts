@@ -47,7 +47,7 @@ export function generateCalendarDays(year: number, month: number): CalendarDay[]
 }
 
 export function formatDateString(date: Date): string {
-  return date.toISOString().split('T')[0];
+  return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
 }
 
 export function formatDateRange(startDate: string, endDate: string): string {

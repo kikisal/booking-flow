@@ -24,6 +24,8 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
   const month = currentDate.getMonth();
   const calendarDays = generateCalendarDays(year, month);
 
+  console.log(calendarDays);
+
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   const roomsMap = rooms.reduce((acc, room) => {
@@ -40,11 +42,9 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
   }, [bookings]);
 
   const handleMouseDown = (dateString: string) => {
-    console.log("🟢 Mouse down - starting drag on:", dateString);
     setIsDragging(true);
     setDragStartDate(dateString);
     setInternalSelectedDates([dateString]);
-    console.log("🟢 Initial selection set to:", [dateString]);
     currentSelectionRef.current = [dateString]; // Keep ref in sync
   };
 
@@ -103,10 +103,8 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
       startDate <= endDate ? startDate : endDate,
       startDate <= endDate ? endDate : startDate
     );
-    console.log("🔵 Mouse enter - updating selection:", { startDate, endDate, dateRange });
     setInternalSelectedDates(dateRange);
     currentSelectionRef.current = dateRange; // Keep ref in sync
-    console.log("🔵 Internal selection updated to:", dateRange);
   };
 
   const handleMouseUp = () => {
@@ -122,14 +120,11 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
     
     // Capture the current selection before clearing drag state
     const finalSelection = [...currentSelectionRef.current];
-    console.log("🟠 Capturing selection - internalSelectedDates:", internalSelectedDates, "currentSelectionRef:", currentSelectionRef.current);
     
     setDragStartDate(null);
 
     if (finalSelection.length > 0) {
       const sortedDates = sortDates(finalSelection);
-      console.log("🟠 Final selection in calendar:", finalSelection, "Sorted:", sortedDates);
-      console.log("🟠 About to call onDatesSelected with:", sortedDates);
       
       // Pass the dates immediately, don't wait
       onDatesSelected(sortedDates);
