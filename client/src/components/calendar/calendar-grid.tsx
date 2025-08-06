@@ -18,6 +18,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
   const [internalSelectedDates, setInternalSelectedDates] = useState<string[]>([]);
   const [autoScrollTimer, setAutoScrollTimer] = useState<NodeJS.Timeout | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const currentSelectionRef = useRef<string[]>([]);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -44,6 +45,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
     setDragStartDate(dateString);
     setInternalSelectedDates([dateString]);
     console.log("🟢 Initial selection set to:", [dateString]);
+    currentSelectionRef.current = [dateString]; // Keep ref in sync
   };
 
   const handleMouseEnter = (dateString: string) => {
@@ -89,6 +91,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
             startDate <= endDate ? endDate : startDate
           );
           setInternalSelectedDates(dateRange);
+          currentSelectionRef.current = dateRange; // Keep ref in sync
         }
       }, 1000); // 1 second delay as requested
       setAutoScrollTimer(timer);
@@ -102,6 +105,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
     );
     console.log("🔵 Mouse enter - updating selection:", { startDate, endDate, dateRange });
     setInternalSelectedDates(dateRange);
+    currentSelectionRef.current = dateRange; // Keep ref in sync
     console.log("🔵 Internal selection updated to:", dateRange);
   };
 
@@ -117,7 +121,8 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
     setIsDragging(false);
     
     // Capture the current selection before clearing drag state
-    const finalSelection = [...internalSelectedDates];
+    const finalSelection = [...currentSelectionRef.current];
+    console.log("🟠 Capturing selection - internalSelectedDates:", internalSelectedDates, "currentSelectionRef:", currentSelectionRef.current);
     
     setDragStartDate(null);
 
