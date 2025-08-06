@@ -52,28 +52,30 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
       setAutoScrollTimer(null);
     }
 
+    // Find the index of the current date in the calendar grid
+    const currentDateIndex = calendarDays.findIndex(day => day.dateString === dateString);
+    const isLastCellOfGrid = currentDateIndex === calendarDays.length - 1; // Last cell (bottom-right)
+    const isFirstCellOfGrid = currentDateIndex === 0; // First cell (top-left)
+    
+    // Check if the date is in next/previous month for navigation direction
     const currentDateObj = new Date(dateString);
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
+    const targetMonth = currentDateObj.getMonth();
+    const targetYear = currentDateObj.getFullYear();
     
-    // Find the last day of the current month
-    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
-    const lastDayString = lastDayOfMonth.toISOString().split('T')[0];
+    const isNextMonth = (targetYear > currentYear) || (targetYear === currentYear && targetMonth > currentMonth);
+    const isPrevMonth = (targetYear < currentYear) || (targetYear === currentYear && targetMonth < currentMonth);
     
-    // Find the first day of the current month  
-    const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
-    const firstDayString = firstDayOfMonth.toISOString().split('T')[0];
-
-    // Check if we're on the exact last cell of the current month (for next month navigation)
-    // or the exact first cell of the current month (for previous month navigation)
-    const isLastDayOfCurrentMonth = dateString === lastDayString;
-    const isFirstDayOfCurrentMonth = dateString === firstDayString;
+    // Auto-scroll logic: last cell goes to next month, first cell goes to previous month
+    const shouldScrollNext = isLastCellOfGrid && isNextMonth;
+    const shouldScrollPrev = isFirstCellOfGrid && isPrevMonth;
     
-    // Only set up auto-scroll for the specific last/first day cells
-    if ((isLastDayOfCurrentMonth || isFirstDayOfCurrentMonth) && onMonthChange) {
+    // Only set up auto-scroll for the specific corner cells
+    if ((shouldScrollNext || shouldScrollPrev) && onMonthChange) {
       const timer = setTimeout(() => {
         if (isDragging && onMonthChange) {
-          const newDate = new Date(currentYear, currentMonth + (isLastDayOfCurrentMonth ? 1 : -1), 1);
+          const newDate = new Date(currentYear, currentMonth + (shouldScrollNext ? 1 : -1), 1);
           onMonthChange(newDate);
           
           // Continue the selection by updating the selected dates immediately
