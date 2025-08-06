@@ -54,13 +54,13 @@ export default function Calendar() {
 
   const handleBookingCreated = () => {
     setShowBookingModal(false);
-    // Don't clear selected dates immediately, let calendar grid handle it
+    setSelectedDates([]); // Clear selection after successful booking
     refetchBookings();
   };
 
   const handleCloseModal = () => {
     setShowBookingModal(false);
-    // Don't clear selected dates immediately, let calendar grid handle it
+    setSelectedDates([]); // Clear selection when modal closes
   };
 
   const monthName = currentDate.toLocaleDateString('en-US', { 
@@ -150,6 +150,7 @@ export default function Calendar() {
             rooms={rooms}
             onDatesSelected={handleDatesSelected}
             onMonthChange={handleMonthChange}
+            selectedDates={selectedDates}
           />
         </div>
 

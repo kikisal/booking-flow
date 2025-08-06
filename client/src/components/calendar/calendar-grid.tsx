@@ -9,12 +9,13 @@ interface CalendarGridProps {
   rooms: Room[];
   onDatesSelected: (dates: string[]) => void;
   onMonthChange?: (date: Date) => void;
+  selectedDates?: string[];
 }
 
-export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, onMonthChange }: CalendarGridProps) {
+export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, onMonthChange, selectedDates: externalSelectedDates = [] }: CalendarGridProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartDate, setDragStartDate] = useState<string | null>(null);
-  const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const [internalSelectedDates, setInternalSelectedDates] = useState<string[]>([]);
   const [autoScrollTimer, setAutoScrollTimer] = useState<NodeJS.Timeout | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +42,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
     console.log("Mouse down - starting drag on:", dateString);
     setIsDragging(true);
     setDragStartDate(dateString);
-    setSelectedDates([dateString]);
+    setInternalSelectedDates([dateString]);
   };
 
   const handleMouseEnter = (dateString: string) => {
@@ -86,7 +87,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
             startDate <= endDate ? startDate : endDate,
             startDate <= endDate ? endDate : startDate
           );
-          setSelectedDates(dateRange);
+          setInternalSelectedDates(dateRange);
         }
       }, 1000); // 1 second delay as requested
       setAutoScrollTimer(timer);
@@ -99,7 +100,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
       startDate <= endDate ? endDate : startDate
     );
     console.log("Mouse enter - updating selection:", { startDate, endDate, dateRange });
-    setSelectedDates(dateRange);
+    setInternalSelectedDates(dateRange);
   };
 
   const handleMouseUp = () => {
@@ -114,7 +115,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
     setIsDragging(false);
     
     // Capture the current selection before clearing drag state
-    const finalSelection = [...selectedDates];
+    const finalSelection = [...internalSelectedDates];
     
     setDragStartDate(null);
 
@@ -125,10 +126,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
       // Pass the dates immediately, don't wait
       onDatesSelected(sortedDates);
       
-      // Clear visual selection after modal opens
-      setTimeout(() => {
-        setSelectedDates([]);
-      }, 1000);
+      // Don't clear selection immediately - let the parent component handle it
     }
   };
 
@@ -198,7 +196,8 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
       >
         {calendarDays.map((day) => {
           const dayBookings = getBookingsForDate(day.dateString);
-          const isSelected = selectedDates.includes(day.dateString);
+          const displayedSelectedDates = isDragging ? internalSelectedDates : externalSelectedDates;
+          const isSelected = displayedSelectedDates.includes(day.dateString);
 
           return (
             <div
