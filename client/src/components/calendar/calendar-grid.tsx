@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { generateCalendarDays, getDatesBetween, sortDates, type CalendarDay } from "@/lib/calendar-utils";
 import type { Room, Booking } from "@shared/schema";
 import { cn } from "@/lib/utils";
@@ -8,12 +8,14 @@ interface CalendarGridProps {
   bookings: Booking[];
   rooms: Room[];
   onDatesSelected: (dates: string[]) => void;
+  onMonthChange?: (date: Date) => void;
 }
 
-export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected }: CalendarGridProps) {
+export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, onMonthChange }: CalendarGridProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartDate, setDragStartDate] = useState<string | null>(null);
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const [autoScrollTimer, setAutoScrollTimer] = useState<NodeJS.Timeout | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
   const year = currentDate.getFullYear();
@@ -44,6 +46,42 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected }: 
   const handleMouseEnter = (dateString: string) => {
     if (!isDragging || !dragStartDate) return;
 
+    // Clear any existing auto-scroll timer
+    if (autoScrollTimer) {
+      clearTimeout(autoScrollTimer);
+      setAutoScrollTimer(null);
+    }
+
+    const currentDateObj = new Date(dateString);
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    const targetMonth = currentDateObj.getMonth();
+    const targetYear = currentDateObj.getFullYear();
+
+    // Check if we're hovering over a date in the next or previous month
+    const isNextMonth = (targetYear > currentYear) || (targetYear === currentYear && targetMonth > currentMonth);
+    const isPrevMonth = (targetYear < currentYear) || (targetYear === currentYear && targetMonth < currentMonth);
+
+    // Set up auto-scroll if we're in a different month and onMonthChange is available
+    if ((isNextMonth || isPrevMonth) && onMonthChange) {
+      const timer = setTimeout(() => {
+        if (isDragging && onMonthChange) {
+          const newDate = new Date(currentYear, currentMonth + (isNextMonth ? 1 : -1), 1);
+          onMonthChange(newDate);
+          
+          // Continue the selection by updating the selected dates immediately
+          const startDate = dragStartDate;
+          const endDate = dateString;
+          const dateRange = getDatesBetween(
+            startDate <= endDate ? startDate : endDate,
+            startDate <= endDate ? endDate : startDate
+          );
+          setSelectedDates(dateRange);
+        }
+      }, 500); // 500ms delay before auto-scrolling
+      setAutoScrollTimer(timer);
+    }
+
     const startDate = dragStartDate;
     const endDate = dateString;
     const dateRange = getDatesBetween(
@@ -55,6 +93,12 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected }: 
 
   const handleMouseUp = () => {
     if (!isDragging) return;
+
+    // Clear any pending auto-scroll timer
+    if (autoScrollTimer) {
+      clearTimeout(autoScrollTimer);
+      setAutoScrollTimer(null);
+    }
 
     setIsDragging(false);
     setDragStartDate(null);
@@ -91,6 +135,15 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected }: 
   const handleTouchEnd = () => {
     handleMouseUp();
   };
+
+  // Cleanup timer on unmount or when dragging stops
+  useEffect(() => {
+    return () => {
+      if (autoScrollTimer) {
+        clearTimeout(autoScrollTimer);
+      }
+    };
+  }, [autoScrollTimer]);
 
   return (
     <div className="calendar-container" data-testid="calendar-grid">

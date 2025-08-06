@@ -40,6 +40,10 @@ export default function Calendar() {
     setCurrentDate(new Date());
   };
 
+  const handleMonthChange = (newDate: Date) => {
+    setCurrentDate(newDate);
+  };
+
   const handleDatesSelected = (dates: string[]) => {
     setSelectedDates(dates);
     if (dates.length > 0) {
@@ -144,6 +148,7 @@ export default function Calendar() {
             bookings={bookings}
             rooms={rooms}
             onDatesSelected={handleDatesSelected}
+            onMonthChange={handleMonthChange}
           />
         </div>
 
