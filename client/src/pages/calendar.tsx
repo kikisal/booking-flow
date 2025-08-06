@@ -45,7 +45,7 @@ export default function Calendar() {
   };
 
   const handleDatesSelected = (dates: string[]) => {
-    console.log("Dates selected in calendar page:", dates);
+    console.log("Dates selected in calendar page:", dates, "Length:", dates.length);
     setSelectedDates(dates);
     if (dates.length > 0) {
       setShowBookingModal(true);

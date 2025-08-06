@@ -29,6 +29,7 @@ export function BookingModal({
   rooms, 
   onBookingCreated 
 }: BookingModalProps) {
+  console.log("BookingModal received selectedDates:", selectedDates, "Length:", selectedDates.length);
   const [selectedRoom, setSelectedRoom] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -68,8 +69,12 @@ export function BookingModal({
 
   useEffect(() => {
     if (selectedRoom && selectedDates.length > 0) {
-      const startDate = selectedDates[0];
-      const endDate = selectedDates[selectedDates.length - 1];
+      // Sort the selected dates to ensure proper order
+      const sortedDates = selectedDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+      const startDate = sortedDates[0];
+      const endDate = sortedDates[sortedDates.length - 1];
+      
+      console.log("Booking modal conflict check - originalDates:", selectedDates, "sortedDates:", sortedDates, "startDate:", startDate, "endDate:", endDate);
       
       checkConflictMutation.mutate({
         roomId: selectedRoom,
@@ -120,11 +125,11 @@ export function BookingModal({
     }
 
     // Sort the dates to ensure correct start and end
-    const sortedDates = selectedDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    const sortedDates = [...selectedDates].sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     const startDate = sortedDates[0];
     const endDate = sortedDates[sortedDates.length - 1];
 
-    console.log("Creating booking with dates:", { selectedDates, startDate, endDate });
+    console.log("Creating booking with dates:", { originalSelected: selectedDates, sortedDates, startDate, endDate });
 
     const bookingData: InsertBooking = {
       roomId: selectedRoom,
