@@ -54,13 +54,13 @@ export default function Calendar() {
 
   const handleBookingCreated = () => {
     setShowBookingModal(false);
-    setSelectedDates([]);
+    // Don't clear selected dates immediately, let calendar grid handle it
     refetchBookings();
   };
 
   const handleCloseModal = () => {
     setShowBookingModal(false);
-    setSelectedDates([]);
+    // Don't clear selected dates immediately, let calendar grid handle it
   };
 
   const monthName = currentDate.toLocaleDateString('en-US', { 

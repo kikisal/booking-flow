@@ -112,18 +112,24 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
     }
 
     setIsDragging(false);
+    
+    // Capture the current selection before clearing drag state
+    const finalSelection = [...selectedDates];
+    
     setDragStartDate(null);
 
-    if (selectedDates.length > 0) {
-      const sortedDates = sortDates(selectedDates);
-      console.log("Selected dates in calendar:", selectedDates, "Sorted:", sortedDates);
+    if (finalSelection.length > 0) {
+      const sortedDates = sortDates(finalSelection);
+      console.log("Final selection in calendar:", finalSelection, "Sorted:", sortedDates);
+      
+      // Pass the dates immediately, don't wait
       onDatesSelected(sortedDates);
+      
+      // Clear visual selection after modal opens
+      setTimeout(() => {
+        setSelectedDates([]);
+      }, 1000);
     }
-
-    // Clear selection after a longer delay to ensure modal gets the data
-    setTimeout(() => {
-      setSelectedDates([]);
-    }, 500);
   };
 
   const handleTouchStart = (dateString: string) => {
