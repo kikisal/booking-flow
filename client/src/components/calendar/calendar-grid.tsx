@@ -114,6 +114,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
 
     if (selectedDates.length > 0) {
       const sortedDates = sortDates(selectedDates);
+      console.log("Selected dates in calendar:", selectedDates, "Sorted:", sortedDates);
       onDatesSelected(sortedDates);
     }
 

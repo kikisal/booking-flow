@@ -119,8 +119,12 @@ export function BookingModal({
       return;
     }
 
-    const startDate = selectedDates[0];
-    const endDate = selectedDates[selectedDates.length - 1];
+    // Sort the dates to ensure correct start and end
+    const sortedDates = selectedDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    const startDate = sortedDates[0];
+    const endDate = sortedDates[sortedDates.length - 1];
+
+    console.log("Creating booking with dates:", { selectedDates, startDate, endDate });
 
     const bookingData: InsertBooking = {
       roomId: selectedRoom,
