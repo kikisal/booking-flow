@@ -145,6 +145,22 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
     handleMouseUp();
   };
 
+  // Add global mouseup listener when dragging starts
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDragging) {
+        handleMouseUp();
+      }
+    };
+
+    if (isDragging) {
+      window.addEventListener('mouseup', handleGlobalMouseUp);
+      return () => {
+        window.removeEventListener('mouseup', handleGlobalMouseUp);
+      };
+    }
+  }, [isDragging]);
+
   // Cleanup timer on unmount or when dragging stops
   useEffect(() => {
     return () => {
@@ -169,8 +185,6 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
       <div 
         ref={gridRef}
         className="grid grid-cols-7 gap-1 drag-select-none"
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
         onTouchEnd={handleTouchEnd}
       >
         {calendarDays.map((day) => {
