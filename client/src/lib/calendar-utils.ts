@@ -51,8 +51,13 @@ export function formatDateString(date: Date): string {
 }
 
 export function formatDateRange(startDate: string, endDate: string): string {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  // Parse dates as local dates to avoid timezone issues
+  // Input format: "2025-08-10" -> create date in local timezone
+  const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
+  const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
+  
+  const start = new Date(startYear, startMonth - 1, startDay); // Month is 0-indexed
+  const end = new Date(endYear, endMonth - 1, endDay);
   
   if (startDate === endDate) {
     return start.toLocaleDateString('en-US', { 

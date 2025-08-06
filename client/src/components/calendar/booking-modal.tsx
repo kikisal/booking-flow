@@ -145,7 +145,10 @@ export function BookingModal({
   };
 
   const selectedDatesText = selectedDates.length > 0 
-    ? formatDateRange(selectedDates[0], selectedDates[selectedDates.length - 1])
+    ? (() => {
+        const sortedDates = [...selectedDates].sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+        return formatDateRange(sortedDates[0], sortedDates[sortedDates.length - 1]);
+      })()
     : "";
 
   const selectedRoomData = rooms.find(room => room.id === selectedRoom);
