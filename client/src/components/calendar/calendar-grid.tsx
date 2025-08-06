@@ -55,18 +55,25 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
     const currentDateObj = new Date(dateString);
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
-    const targetMonth = currentDateObj.getMonth();
-    const targetYear = currentDateObj.getFullYear();
+    
+    // Find the last day of the current month
+    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+    const lastDayString = lastDayOfMonth.toISOString().split('T')[0];
+    
+    // Find the first day of the current month  
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+    const firstDayString = firstDayOfMonth.toISOString().split('T')[0];
 
-    // Check if we're hovering over a date in the next or previous month
-    const isNextMonth = (targetYear > currentYear) || (targetYear === currentYear && targetMonth > currentMonth);
-    const isPrevMonth = (targetYear < currentYear) || (targetYear === currentYear && targetMonth < currentMonth);
-
-    // Set up auto-scroll if we're in a different month and onMonthChange is available
-    if ((isNextMonth || isPrevMonth) && onMonthChange) {
+    // Check if we're on the exact last cell of the current month (for next month navigation)
+    // or the exact first cell of the current month (for previous month navigation)
+    const isLastDayOfCurrentMonth = dateString === lastDayString;
+    const isFirstDayOfCurrentMonth = dateString === firstDayString;
+    
+    // Only set up auto-scroll for the specific last/first day cells
+    if ((isLastDayOfCurrentMonth || isFirstDayOfCurrentMonth) && onMonthChange) {
       const timer = setTimeout(() => {
         if (isDragging && onMonthChange) {
-          const newDate = new Date(currentYear, currentMonth + (isNextMonth ? 1 : -1), 1);
+          const newDate = new Date(currentYear, currentMonth + (isLastDayOfCurrentMonth ? 1 : -1), 1);
           onMonthChange(newDate);
           
           // Continue the selection by updating the selected dates immediately
@@ -78,7 +85,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
           );
           setSelectedDates(dateRange);
         }
-      }, 500); // 500ms delay before auto-scrolling
+      }, 1000); // 1 second delay as requested
       setAutoScrollTimer(timer);
     }
 
