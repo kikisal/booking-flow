@@ -118,10 +118,10 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
       onDatesSelected(sortedDates);
     }
 
-    // Clear selection after a short delay
+    // Clear selection after a longer delay to ensure modal gets the data
     setTimeout(() => {
       setSelectedDates([]);
-    }, 100);
+    }, 500);
   };
 
   const handleTouchStart = (dateString: string) => {
