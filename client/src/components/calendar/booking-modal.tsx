@@ -29,7 +29,8 @@ export function BookingModal({
   rooms, 
   onBookingCreated 
 }: BookingModalProps) {
-  console.log("BookingModal received selectedDates:", selectedDates, "Length:", selectedDates.length);
+  console.log("🔴 BookingModal received selectedDates:", selectedDates, "Length:", selectedDates.length);
+  console.log("🔴 BookingModal open state:", open);
   const [selectedRoom, setSelectedRoom] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");

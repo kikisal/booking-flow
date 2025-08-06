@@ -39,10 +39,11 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
   }, [bookings]);
 
   const handleMouseDown = (dateString: string) => {
-    console.log("Mouse down - starting drag on:", dateString);
+    console.log("🟢 Mouse down - starting drag on:", dateString);
     setIsDragging(true);
     setDragStartDate(dateString);
     setInternalSelectedDates([dateString]);
+    console.log("🟢 Initial selection set to:", [dateString]);
   };
 
   const handleMouseEnter = (dateString: string) => {
@@ -99,8 +100,9 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
       startDate <= endDate ? startDate : endDate,
       startDate <= endDate ? endDate : startDate
     );
-    console.log("Mouse enter - updating selection:", { startDate, endDate, dateRange });
+    console.log("🔵 Mouse enter - updating selection:", { startDate, endDate, dateRange });
     setInternalSelectedDates(dateRange);
+    console.log("🔵 Internal selection updated to:", dateRange);
   };
 
   const handleMouseUp = () => {
@@ -121,7 +123,8 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
 
     if (finalSelection.length > 0) {
       const sortedDates = sortDates(finalSelection);
-      console.log("Final selection in calendar:", finalSelection, "Sorted:", sortedDates);
+      console.log("🟠 Final selection in calendar:", finalSelection, "Sorted:", sortedDates);
+      console.log("🟠 About to call onDatesSelected with:", sortedDates);
       
       // Pass the dates immediately, don't wait
       onDatesSelected(sortedDates);
