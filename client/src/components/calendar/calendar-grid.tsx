@@ -38,6 +38,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
   }, [bookings]);
 
   const handleMouseDown = (dateString: string) => {
+    console.log("Mouse down - starting drag on:", dateString);
     setIsDragging(true);
     setDragStartDate(dateString);
     setSelectedDates([dateString]);
@@ -97,6 +98,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
       startDate <= endDate ? startDate : endDate,
       startDate <= endDate ? endDate : startDate
     );
+    console.log("Mouse enter - updating selection:", { startDate, endDate, dateRange });
     setSelectedDates(dateRange);
   };
 
