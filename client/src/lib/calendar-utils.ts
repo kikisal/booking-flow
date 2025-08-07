@@ -1,3 +1,6 @@
+import { config } from "@shared/config";
+import { loadConfigFromFile } from "vite";
+
 export interface CalendarDay {
   date: Date;
   dateString: string;
@@ -55,43 +58,36 @@ export function formatDateRange(startDate: string, endDate: string): string {
   // Input format: "2025-08-10" -> create date in local timezone
   const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
   const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
-  
+
   const start = new Date(startYear, startMonth - 1, startDay); // Month is 0-indexed
   const end = new Date(endYear, endMonth - 1, endDay);
   
   if (startDate === endDate) {
-    return start.toLocaleDateString('en-US', { 
-      month: 'short', 
+    return start.toLocaleDateString(config.defaultLanguage, { 
+      month: 'short',
       day: 'numeric', 
-      year: 'numeric' 
+      year: 'numeric'
     });
   }
   
   if (start.getFullYear() === end.getFullYear()) {
     if (start.getMonth() === end.getMonth()) {
-      return `${start.toLocaleDateString('en-US', { 
+      return `${start.getDate()} ${start.toLocaleDateString(config.defaultLanguage, { 
         month: 'short', 
-        day: 'numeric' 
-      })}-${end.getDate()}, ${start.getFullYear()}`;
+      })} - ${end.getDate()}, ${start.getFullYear()}`;
     } else {
-      return `${start.toLocaleDateString('en-US', { 
+      return `${start.getDate()} ${start.toLocaleDateString(config.defaultLanguage, { 
         month: 'short', 
-        day: 'numeric' 
-      })} - ${end.toLocaleDateString('en-US', { 
+      })} - ${end.getDate()} ${end.toLocaleDateString(config.defaultLanguage, { 
         month: 'short', 
-        day: 'numeric' 
       })}, ${start.getFullYear()}`;
     }
   } else {
-    return `${start.toLocaleDateString('en-US', { 
+    return `${start.getDate()} ${start.toLocaleDateString(config.defaultLanguage, { 
       month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
-    })} - ${end.toLocaleDateString('en-US', { 
+    })} ${start.getFullYear()} - ${end.getDate()} ${end.toLocaleDateString(config.defaultLanguage, { 
       month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
-    })}`;
+    })} ${end.getFullYear()}`;
   }
 }
 
@@ -111,4 +107,12 @@ export function getDatesBetween(startDate: string, endDate: string): string[] {
 
 export function sortDates(dates: string[]): string[] {
   return dates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+}
+
+const _toLocaleDateString = Date.prototype.toLocaleDateString;
+
+// @ts-ignore
+Date.prototype.toLocaleDateString = function(lang, options) {
+  const str = _toLocaleDateString.call(this, lang, options);
+  return str.substring(1, 0).toUpperCase() + str.substring(1);
 }

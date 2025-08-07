@@ -13,6 +13,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { formatDateRange } from "@/lib/calendar-utils";
 import type { Room, InsertBooking } from "@shared/schema";
 import { AlertTriangle, Check, X } from "lucide-react";
+import { getStrings } from "@shared/strings";
+import { config } from "@shared/config";
 
 interface BookingModalProps {
   open: boolean;
@@ -29,13 +31,13 @@ export function BookingModal({
   rooms, 
   onBookingCreated 
 }: BookingModalProps) {
-  console.log("🔴 BookingModal received selectedDates:", selectedDates, "Length:", selectedDates.length);
-  console.log("🔴 BookingModal open state:", open);
+  
   const [selectedRoom, setSelectedRoom] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [hasConflict, setHasConflict] = useState(false);
+  const strings = getStrings(config.defaultLanguage);
   
   const { toast } = useToast();
 
@@ -53,16 +55,16 @@ export function BookingModal({
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Booking created successfully!",
+        title: strings.MODAL_BOOKING_CREATED_TITLE,
+        description: strings.MODAL_BOOKING_CREATED,
       });
       onBookingCreated();
       resetForm();
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create booking",
+        title: strings.MODAL_BOOKING_ERROR_TITLE,
+        description: error.message || strings.MODAL_CREATION_FAILED,
         variant: "destructive",
       });
     },
@@ -74,9 +76,7 @@ export function BookingModal({
       const sortedDates = selectedDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
       const startDate = sortedDates[0];
       const endDate = sortedDates[sortedDates.length - 1];
-      
-      console.log("Booking modal conflict check - originalDates:", selectedDates, "sortedDates:", sortedDates, "startDate:", startDate, "endDate:", endDate);
-      
+            
       checkConflictMutation.mutate({
         roomId: selectedRoom,
         startDate,
@@ -109,8 +109,8 @@ export function BookingModal({
 
     if (!selectedRoom || !customerName || selectedDates.length === 0) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields",
+        title: strings.MODAL_BOOKING_ERROR_TITLE,
+        description: strings.MODAL_BOOKING_ERROR,
         variant: "destructive",
       });
       return;
@@ -118,8 +118,8 @@ export function BookingModal({
 
     if (hasConflict) {
       toast({
-        title: "Error",
-        description: "This room is already booked for some of the selected dates",
+        title: strings.MODAL_BOOKING_ERROR_TITLE,
+        description: strings.MODAL_DATE_CONFLICT,
         variant: "destructive",
       });
       return;
@@ -129,8 +129,6 @@ export function BookingModal({
     const sortedDates = [...selectedDates].sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     const startDate = sortedDates[0];
     const endDate = sortedDates[sortedDates.length - 1];
-
-    console.log("Creating booking with dates:", { originalSelected: selectedDates, sortedDates, startDate, endDate });
 
     const bookingData: InsertBooking = {
       roomId: selectedRoom,
@@ -158,16 +156,13 @@ export function BookingModal({
       <DialogContent className="w-full max-w-md" data-testid="booking-modal">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            Create New Booking
-            <Button variant="ghost" size="sm" onClick={handleClose} data-testid="button-close-modal">
-              <X className="w-4 h-4" />
-            </Button>
+            {strings.MODAL_CREATE_NEW_BOOKING}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4" data-testid="booking-form">
           <div>
-            <Label className="text-sm font-medium text-slate-700">Selected Dates</Label>
+            <Label className="text-sm font-medium text-slate-700">{strings.MODAL_SELECT_DATES}</Label>
             <div className="p-3 bg-slate-50 rounded-lg mt-2">
               <span className="text-sm text-slate-600" data-testid="selected-dates">
                 {selectedDatesText}
@@ -177,11 +172,11 @@ export function BookingModal({
 
           <div>
             <Label htmlFor="room-select" className="text-sm font-medium text-slate-700">
-              Room Assignment *
+              {strings.MODAL_ROOM_ASSIGNMENT} *
             </Label>
             <Select value={selectedRoom} onValueChange={setSelectedRoom} required>
               <SelectTrigger className="mt-2" data-testid="select-room">
-                <SelectValue placeholder="Select a room..." />
+                <SelectValue placeholder={strings.MODAL_SELECT_ROOM_INPUT} />
               </SelectTrigger>
               <SelectContent>
                 {rooms.map((room) => (
@@ -201,12 +196,12 @@ export function BookingModal({
 
           <div>
             <Label htmlFor="customer-name" className="text-sm font-medium text-slate-700">
-              Customer Name *
+              {strings.MODAL_CUSTOMER_NAME} *
             </Label>
             <Input
               id="customer-name"
               type="text"
-              placeholder="Enter customer name"
+              placeholder={strings.MODAL_ENTER_CUSTOMER_NAME_INPUT}
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
               className="mt-2"
@@ -217,7 +212,7 @@ export function BookingModal({
 
           <div>
             <Label htmlFor="customer-email" className="text-sm font-medium text-slate-700">
-              Customer Email
+              {strings.MODAL_CUSTOMER_EMAIL}
             </Label>
             <Input
               id="customer-email"
@@ -232,11 +227,11 @@ export function BookingModal({
 
           <div>
             <Label htmlFor="notes" className="text-sm font-medium text-slate-700">
-              Special Notes
+              {strings.MODAL_SPECIAL_NOTES}
             </Label>
             <Textarea
               id="notes"
-              placeholder="Any special requirements or notes..."
+              placeholder={strings.MODAL_SPECIAL_NOTES_INPUT}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="mt-2 h-20 resize-none"
@@ -248,7 +243,7 @@ export function BookingModal({
             <Alert variant="destructive" data-testid="conflict-warning">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                This room is already booked for some of the selected dates.
+                {strings.MODAL_DATE_CONFLICT}
               </AlertDescription>
             </Alert>
           )}
@@ -261,7 +256,7 @@ export function BookingModal({
               onClick={handleClose}
               data-testid="button-cancel"
             >
-              Cancel
+              {strings.MODAL_CANCEL_BUTTON}
             </Button>
             <Button
               type="submit"
@@ -270,11 +265,11 @@ export function BookingModal({
               data-testid="button-create-booking"
             >
               {createBookingMutation.isPending ? (
-                "Creating..."
+                strings.MODAL_PENDING_CREATING
               ) : (
                 <>
                   <Check className="w-4 h-4 mr-2" />
-                  Create Booking
+                  {strings.MODAL_CREATE_BOOKING_BUTTON}
                 </>
               )}
             </Button>

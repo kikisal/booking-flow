@@ -7,6 +7,9 @@ import { apiRequest } from "@/lib/queryClient";
 import { formatDateRange } from "@/lib/calendar-utils";
 import type { Room, Booking } from "@shared/schema";
 import { Edit, Trash2 } from "lucide-react";
+import { getStrings } from "@shared/strings";
+import { config } from "@shared/config";
+import { string } from "zod";
 
 interface BookingSummaryProps {
   bookings: Booking[];
@@ -56,17 +59,19 @@ export function BookingSummary({ bookings, rooms, onBookingUpdated }: BookingSum
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
   };
 
+  const strings = getStrings(config.defaultLanguage);
+
   if (bookings.length === 0) {
     return (
       <Card data-testid="booking-summary">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-slate-900">
-            Current Month Bookings
+            {strings.CURRENT_MONTH_BOOKINGS}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-slate-500">No bookings for this month</p>
+            <p className="text-slate-500">{strings.NO_BOOKINGS_AVAILABLE}</p>
           </div>
         </CardContent>
       </Card>
@@ -77,7 +82,7 @@ export function BookingSummary({ bookings, rooms, onBookingUpdated }: BookingSum
     <Card data-testid="booking-summary">
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-slate-900">
-          Current Month Bookings ({bookings.length})
+          {strings.CURRENT_MONTH_BOOKINGS} ({bookings.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -117,7 +122,7 @@ export function BookingSummary({ bookings, rooms, onBookingUpdated }: BookingSum
                     {dateRange}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {duration} day{duration !== 1 ? 's' : ''}
+                    {duration} {duration !== 1 ? strings.DAYS_LABEL : strings.DAY_LABEL}
                   </p>
                 </div>
                 <div className="flex space-x-2">

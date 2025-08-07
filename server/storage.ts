@@ -29,11 +29,9 @@ export class MemStorage implements IStorage {
 
   private initializeRooms() {
     const defaultRooms: Room[] = [
-      { id: "executive", name: "Executive Suite", color: "hsl(0, 84%, 60%)" },
-      { id: "standard", name: "Standard Room", color: "hsl(142, 71%, 45%)" },
-      { id: "deluxe", name: "Deluxe Room", color: "hsl(38, 92%, 50%)" },
-      { id: "family", name: "Family Suite", color: "hsl(262, 83%, 58%)" },
-      { id: "penthouse", name: "Penthouse", color: "hsl(199, 89%, 48%)" },
+      { id: "green-room", name: "Green Room", color: "hsl(142, 71%, 45%)" },
+      { id: "red-room", name: "Red Room", color: "hsl(0, 84%, 60%)" },
+      { id: "yellow-room", name: "Yellow Room", color: "hsl(38, 92%, 50%)" }
     ];
 
     defaultRooms.forEach(room => {
@@ -46,48 +44,50 @@ export class MemStorage implements IStorage {
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
     
-    const sampleBookings: Array<Omit<Booking, 'id' | 'createdAt'>> = [
-      {
-        roomId: "executive",
-        customerName: "John Smith",
-        customerEmail: "john.smith@example.com",
-        startDate: new Date(currentYear, currentMonth, 5).toISOString().split('T')[0],
-        endDate: new Date(currentYear, currentMonth, 7).toISOString().split('T')[0],
-        notes: "Business conference"
-      },
-      {
-        roomId: "standard",
-        customerName: "Sarah Johnson",
-        customerEmail: "sarah@example.com",
-        startDate: new Date(currentYear, currentMonth, 12).toISOString().split('T')[0],
-        endDate: new Date(currentYear, currentMonth, 14).toISOString().split('T')[0],
-        notes: null
-      },
-      {
-        roomId: "deluxe",
-        customerName: "Mike Wilson",
-        customerEmail: null,
-        startDate: new Date(currentYear, currentMonth, 20).toISOString().split('T')[0],
-        endDate: new Date(currentYear, currentMonth, 22).toISOString().split('T')[0],
-        notes: "Wedding celebration"
-      },
-      {
-        roomId: "family",
-        customerName: "Emma Davis",
-        customerEmail: "emma.davis@example.com",
-        startDate: new Date(currentYear, currentMonth, 15).toISOString().split('T')[0],
-        endDate: new Date(currentYear, currentMonth, 18).toISOString().split('T')[0],
-        notes: "Family vacation"
-      },
-      {
-        roomId: "penthouse",
-        customerName: "Robert Brown",
-        customerEmail: "rbrown@example.com",
-        startDate: new Date(currentYear, currentMonth, 25).toISOString().split('T')[0],
-        endDate: new Date(currentYear, currentMonth, 28).toISOString().split('T')[0],
-        notes: "Corporate retreat"
-      }
-    ];
+    // const sampleBookings: Array<Omit<Booking, 'id' | 'createdAt'>> = [
+    // //   {
+    // //     roomId: "executive",
+    // //     customerName: "John Smith",
+    // //     customerEmail: "john.smith@example.com",
+    // //     startDate: new Date(currentYear, currentMonth, 5).toISOString().split('T')[0],
+    // //     endDate: new Date(currentYear, currentMonth, 7).toISOString().split('T')[0],
+    // //     notes: "Business conference"
+    // //   },
+    // //   {
+    // //     roomId: "standard",
+    // //     customerName: "Sarah Johnson",
+    // //     customerEmail: "sarah@example.com",
+    // //     startDate: new Date(currentYear, currentMonth, 12).toISOString().split('T')[0],
+    // //     endDate: new Date(currentYear, currentMonth, 14).toISOString().split('T')[0],
+    // //     notes: null
+    // //   },
+    // //   {
+    // //     roomId: "deluxe",
+    // //     customerName: "Mike Wilson",
+    // //     customerEmail: null,
+    // //     startDate: new Date(currentYear, currentMonth, 20).toISOString().split('T')[0],
+    // //     endDate: new Date(currentYear, currentMonth, 22).toISOString().split('T')[0],
+    // //     notes: "Wedding celebration"
+    // //   },
+    // //   {
+    // //     roomId: "family",
+    // //     customerName: "Emma Davis",
+    // //     customerEmail: "emma.davis@example.com",
+    // //     startDate: new Date(currentYear, currentMonth, 15).toISOString().split('T')[0],
+    // //     endDate: new Date(currentYear, currentMonth, 18).toISOString().split('T')[0],
+    // //     notes: "Family vacation"
+    // //   },
+    // //   {
+    // //     roomId: "penthouse",
+    // //     customerName: "Robert Brown",
+    // //     customerEmail: "rbrown@example.com",
+    // //     startDate: new Date(currentYear, currentMonth, 25).toISOString().split('T')[0],
+    // //     endDate: new Date(currentYear, currentMonth, 28).toISOString().split('T')[0],
+    // //     notes: "Corporate retreat"
+    // //   }
+    // // ];
+
+    const sampleBookings: Array<Omit<Booking, 'id' | 'createdAt'>>  = [];
 
     sampleBookings.forEach(booking => {
       const id = randomUUID();
