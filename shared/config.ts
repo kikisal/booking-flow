@@ -1,5 +1,6 @@
 export const config = {
     defaultLanguage: "it",
+    MONGO_URI: "mongodb://localhost:27017",
     strings: {
         en: {
             HEADLINE_TITLE: "Room Booking Calendar",

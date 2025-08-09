@@ -35,6 +35,28 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  app.get("/api/room-bookings/:roomId", async (req, res) => {
+    try {
+      const { year, month } = req.query;
+      const { roomId }      = req.params;
+      
+      if (year && month) {
+        const bookings = await storage.getBookingsByRoomId(
+          roomId as string,
+          parseInt(year as string),
+          parseInt(month as string)
+        );
+        res.json(bookings);
+      } else {
+        const bookings = await storage.getBookings();
+        res.json(bookings);
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch bookings" });
+    }
+  });
+  
+
   // Get single booking
   app.get("/api/bookings/:id", async (req, res) => {
     try {
@@ -91,11 +113,11 @@ export function registerRoutes(app: Express) {
         if (!existing) {
           return res.status(404).json({ message: "Booking not found" });
         }
-
+        
         const hasConflict = await storage.checkBookingConflict(
-          validatedData.roomId || existing.roomId,
-          validatedData.startDate || existing.startDate,
-          validatedData.endDate || existing.endDate,
+          (validatedData.roomId || existing.roomId) as any,
+          (validatedData.startDate || existing.startDate) as any,
+          (validatedData.endDate || existing.endDate) as any,
           req.params.id
         );
 
@@ -139,6 +161,7 @@ export function registerRoutes(app: Express) {
   app.post("/api/bookings/check-conflict", async (req, res) => {
     try {
       const { roomId, startDate, endDate, excludeBookingId } = req.body;
+
       
       if (!roomId || !startDate || !endDate) {
         return res.status(400).json({ 

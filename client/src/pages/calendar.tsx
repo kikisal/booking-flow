@@ -99,25 +99,18 @@ export default function Calendar() {
 							<span className="text-sm font-medium text-slate-700">{strings.ROOMS_LABEL}:</span>
 							<div className="flex space-x-3">
 								{rooms.map((room) => (
-									<div key={room.id} className="flex items-center space-x-1">
+									<div key={room._id} className="flex items-center space-x-1">
 										<div
 											className="w-3 h-3 rounded-full"
 											style={{ backgroundColor: room.color }}
-											data-testid={`room-legend-${room.id}`}
+											data-testid={`room-legend-${room._id}`}
 										/>
 										<span className="text-xs text-slate-600">{room.name}</span>
 									</div>
 								))}
 							</div>
 						</div>
-						<Button
-							onClick={() => setShowBookingModal(true)}
-							className="bg-blue-600 hover:bg-blue-700"
-							data-testid="button-new-booking"
-						>
-							<Plus className="w-4 h-4 mr-2" />
-							{strings.NEW_BOOKING_ACTION}
-						</Button>
+						
 					</div>
 				</div>
 			</header>
@@ -180,7 +173,7 @@ export default function Calendar() {
 				<h4 className="text-sm font-medium text-slate-700 mb-3">{strings.ROOM_LEGEND_LABEL}</h4>
 				<div className="grid grid-cols-2 gap-2 text-xs">
 					{rooms.map((room) => (
-						<div key={room.id} className="flex items-center space-x-2">
+						<div key={room._id} className="flex items-center space-x-2">
 							<div
 								className="w-3 h-3 rounded-full"
 								style={{ backgroundColor: room.color }}

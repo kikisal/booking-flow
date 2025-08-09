@@ -14,6 +14,8 @@ interface CalendarGridProps {
 	selectedDates?: string[];
 }
 
+let _gMouseUp = true;
+
 export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, onMonthChange, selectedDates: externalSelectedDates = [] }: CalendarGridProps) {
 	const [isDragging, setIsDragging] = useState(false);
 	const [dragStartDate, setDragStartDate] = useState<string | null>(null);
@@ -39,7 +41,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
 	];
 
 	const roomsMap = rooms.reduce((acc, room) => {
-		acc[room.id] = room;
+		acc[room._id] = room;
 		return acc;
 	}, {} as Record<string, Room>);
 
@@ -53,15 +55,14 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
 	};
 
 	const handleMouseDown = (dateString: string) => {
+		_gMouseUp = false;
 		setIsDragging(true);
 		setDragStartDate(dateString);
 		setInternalSelectedDates([dateString]);
 		currentSelectionRef.current = [dateString]; // Keep ref in sync
-		console.log("mouse down");
 	};
 
 	const handleMouseEnter = (dateString: string) => {
-		console.log("mouse enter");
 		if (!isDragging || !dragStartDate) return;
 
 		// Clear any existing auto-scroll timer
@@ -92,6 +93,8 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
 		// Only set up auto-scroll for the specific corner cells
 		if ((shouldScrollNext || shouldScrollPrev) && onMonthChange) {
 			const timer = setTimeout(() => {
+				if (_gMouseUp) return;
+				
 				if (isDragging && onMonthChange) {
 					const newDate = new Date(currentYear, currentMonth + (shouldScrollNext ? 1 : -1), 1);
 					onMonthChange(newDate);
@@ -109,7 +112,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
 					setInternalSelectedDates(dateRange);
 					currentSelectionRef.current = dateRange; // Keep ref in sync
 				}
-			}, 1000); // 1 second delay as requested
+			}, 1000);
 			setAutoScrollTimer(timer);
 		}
 
@@ -127,6 +130,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
 	};
 
 	const handleMouseUp = () => {
+		_gMouseUp = true;
 		if (!isDragging) return;
 
 		// Clear any pending auto-scroll timer
@@ -266,7 +270,7 @@ export function CalendarGrid({ currentDate, bookings, rooms, onDatesSelected, on
 							{dayBookings.length > 0 && (
 								<div className="absolute bottom-1 left-1 right-1 space-y-1">
 									{dayBookings.slice(0, 3).map((booking) => {
-										const room = roomsMap[booking.roomId];
+										const room = roomsMap[(booking.roomId as any)._id];
 										return (
 											<div
 												key={booking.id}

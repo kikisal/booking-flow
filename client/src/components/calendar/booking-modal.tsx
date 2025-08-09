@@ -149,7 +149,7 @@ export function BookingModal({
       })()
     : "";
 
-  const selectedRoomData = rooms.find(room => room.id === selectedRoom);
+  const selectedRoomData = rooms.find(room => room._id === selectedRoom);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -180,7 +180,7 @@ export function BookingModal({
               </SelectTrigger>
               <SelectContent>
                 {rooms.map((room) => (
-                  <SelectItem key={room.id} value={room.id} data-testid={`room-option-${room.id}`}>
+                  <SelectItem key={room._id} value={room._id} data-testid={`room-option-${room._id}`}>
                     <div className="flex items-center space-x-2">
                       <div 
                         className="w-3 h-3 rounded-full" 

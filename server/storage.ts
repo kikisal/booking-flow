@@ -1,182 +1,126 @@
-import { type Room, type Booking, type InsertRoom, type InsertBooking } from "@shared/schema";
-import { randomUUID } from "crypto";
+// storage.ts
+import mongoose from "mongoose";
+import {
+	RoomModel,
+	BookingModel,
+	type Room,
+	type Booking,
+	type InsertRoom,
+	type InsertBooking,
+} from "@shared/schema";
 
+// ===== Storage Interface =====
 export interface IStorage {
-  // Room methods
-  getRooms(): Promise<Room[]>;
-  getRoom(id: string): Promise<Room | undefined>;
-  
-  // Booking methods
-  getBookings(): Promise<Booking[]>;
-  getBookingsByMonth(year: number, month: number): Promise<Booking[]>;
-  getBooking(id: string): Promise<Booking | undefined>;
-  createBooking(booking: InsertBooking): Promise<Booking>;
-  updateBooking(id: string, booking: Partial<InsertBooking>): Promise<Booking | undefined>;
-  deleteBooking(id: string): Promise<boolean>;
-  checkBookingConflict(roomId: string, startDate: string, endDate: string, excludeBookingId?: string): Promise<boolean>;
+	getRooms(): Promise<Room[]>;
+	getRoom(id: string): Promise<Room | null>;
+
+	getBookings(): Promise<Booking[]>;
+	getBookingsByMonth(year: number, month: number): Promise<Booking[]>;
+	getBookingsByRoomId(roomId: string, year: number, month: number): Promise<Booking[]>;
+
+	getBooking(id: string): Promise<Booking | null>;
+	createBooking(booking: InsertBooking): Promise<Booking>;
+	updateBooking(id: string, booking: Partial<InsertBooking>): Promise<Booking | null>;
+	deleteBooking(id: string): Promise<boolean>;
+	checkBookingConflict(
+		roomId: string,
+		startDate: string,
+		endDate: string,
+		excludeBookingId?: string
+	): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  private rooms: Map<string, Room>;
-  private bookings: Map<string, Booking>;
+// ===== Mongo Storage Implementation =====
+export class MongoStorage implements IStorage {
+	async getRooms(): Promise<Room[]> {
+		return RoomModel.find().lean();
+	}
 
-  constructor() {
-    this.rooms = new Map();
-    this.bookings = new Map();
-    this.initializeRooms();
-    this.initializeSampleBookings();
-  }
+	async getRoom(id: string): Promise<Room | null> {
+		return RoomModel.findById(id).lean();
+	}
 
-  private initializeRooms() {
-    const defaultRooms: Room[] = [
-      { id: "green-room", name: "Green Room", color: "hsl(142, 71%, 45%)" },
-      { id: "red-room", name: "Red Room", color: "hsl(0, 84%, 60%)" },
-      { id: "yellow-room", name: "Yellow Room", color: "hsl(38, 92%, 50%)" }
-    ];
+	async getBookings(): Promise<Booking[]> {
+		return BookingModel.find().populate("roomId").lean();
+	}
 
-    defaultRooms.forEach(room => {
-      this.rooms.set(room.id, room);
-    });
-  }
+	async getBookingsByMonth(year: number, month: number): Promise<Booking[]> {
+		const monthStart = new Date(year, month - 1, 1);
+		const monthEnd = new Date(year, month, 0, 23, 59, 59);
 
-  private initializeSampleBookings() {
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    
-    // const sampleBookings: Array<Omit<Booking, 'id' | 'createdAt'>> = [
-    // //   {
-    // //     roomId: "executive",
-    // //     customerName: "John Smith",
-    // //     customerEmail: "john.smith@example.com",
-    // //     startDate: new Date(currentYear, currentMonth, 5).toISOString().split('T')[0],
-    // //     endDate: new Date(currentYear, currentMonth, 7).toISOString().split('T')[0],
-    // //     notes: "Business conference"
-    // //   },
-    // //   {
-    // //     roomId: "standard",
-    // //     customerName: "Sarah Johnson",
-    // //     customerEmail: "sarah@example.com",
-    // //     startDate: new Date(currentYear, currentMonth, 12).toISOString().split('T')[0],
-    // //     endDate: new Date(currentYear, currentMonth, 14).toISOString().split('T')[0],
-    // //     notes: null
-    // //   },
-    // //   {
-    // //     roomId: "deluxe",
-    // //     customerName: "Mike Wilson",
-    // //     customerEmail: null,
-    // //     startDate: new Date(currentYear, currentMonth, 20).toISOString().split('T')[0],
-    // //     endDate: new Date(currentYear, currentMonth, 22).toISOString().split('T')[0],
-    // //     notes: "Wedding celebration"
-    // //   },
-    // //   {
-    // //     roomId: "family",
-    // //     customerName: "Emma Davis",
-    // //     customerEmail: "emma.davis@example.com",
-    // //     startDate: new Date(currentYear, currentMonth, 15).toISOString().split('T')[0],
-    // //     endDate: new Date(currentYear, currentMonth, 18).toISOString().split('T')[0],
-    // //     notes: "Family vacation"
-    // //   },
-    // //   {
-    // //     roomId: "penthouse",
-    // //     customerName: "Robert Brown",
-    // //     customerEmail: "rbrown@example.com",
-    // //     startDate: new Date(currentYear, currentMonth, 25).toISOString().split('T')[0],
-    // //     endDate: new Date(currentYear, currentMonth, 28).toISOString().split('T')[0],
-    // //     notes: "Corporate retreat"
-    // //   }
-    // // ];
+		return BookingModel.find({
+			$or: [
+				{ startDate: { $lte: monthEnd }, endDate: { $gte: monthStart } },
+			],
+		})
+		.populate("roomId")
+		.lean();
+	}
 
-    const sampleBookings: Array<Omit<Booking, 'id' | 'createdAt'>>  = [];
+	async getBookingsByRoomId(
+		roomId: string,
+		year: number,
+		month: number
+	): Promise<Booking[]> {
+		const monthStart = new Date(year, month - 1, 1);
+		const monthEnd = new Date(year, month, 0, 23, 59, 59);
 
-    sampleBookings.forEach(booking => {
-      const id = randomUUID();
-      const fullBooking: Booking = {
-        ...booking,
-        id,
-        createdAt: new Date()
-      };
-      this.bookings.set(id, fullBooking);
-    });
-  }
+		return BookingModel.find({
+			roomId,
+			$or: [
+				{ startDate: { $lte: monthEnd }, endDate: { $gte: monthStart } },
+			],
+		})
+			.populate("roomId")
+			.lean();
+	}
 
-  async getRooms(): Promise<Room[]> {
-    return Array.from(this.rooms.values());
-  }
+	async getBooking(id: string): Promise<Booking | null> {
+		return BookingModel.findById(id).populate("roomId").lean();
+	}
 
-  async getRoom(id: string): Promise<Room | undefined> {
-    return this.rooms.get(id);
-  }
+	async createBooking(insertBooking: InsertBooking): Promise<Booking> {
+		const booking = new BookingModel({
+			...insertBooking,
+			startDate: new Date(insertBooking.startDate),
+			endDate: new Date(insertBooking.endDate),
+		});
+		await booking.save();
+		return booking.toObject();
+	}
 
-  async getBookings(): Promise<Booking[]> {
-    return Array.from(this.bookings.values());
-  }
+	async updateBooking(id: string, updates: Partial<InsertBooking>): Promise<Booking | null> {
+		if (updates.startDate) updates.startDate = new Date(updates.startDate) as any;
+		if (updates.endDate) updates.endDate = new Date(updates.endDate) as any;
 
-  async getBookingsByMonth(year: number, month: number): Promise<Booking[]> {
-    const bookings = Array.from(this.bookings.values());
-    return bookings.filter(booking => {
-      const startDate = new Date(booking.startDate);
-      const endDate = new Date(booking.endDate);
-      const monthStart = new Date(year, month - 1, 1);
-      const monthEnd = new Date(year, month, 0);
-      
-      return (startDate <= monthEnd && endDate >= monthStart);
-    });
-  }
+		const booking = await BookingModel.findByIdAndUpdate(id, updates, { new: true }).lean();
+		return booking;
+	}
 
-  async getBooking(id: string): Promise<Booking | undefined> {
-    return this.bookings.get(id);
-  }
+	async deleteBooking(id: string): Promise<boolean> {
+		const result = await BookingModel.findByIdAndDelete(id);
+		return !!result;
+	}
 
-  async createBooking(insertBooking: InsertBooking): Promise<Booking> {
-    const id = randomUUID();
-    const booking: Booking = {
-      ...insertBooking,
-      id,
-      customerEmail: insertBooking.customerEmail ?? null,
-      notes: insertBooking.notes ?? null,
-      createdAt: new Date(),
-    };
-    this.bookings.set(id, booking);
-    return booking;
-  }
+	async checkBookingConflict(
+		roomId: string,
+		startDate: string,
+		endDate: string,
+		excludeBookingId?: string
+	): Promise<boolean> {
+		const start = new Date(startDate);
+		const end = new Date(endDate);
 
-  async updateBooking(id: string, updates: Partial<InsertBooking>): Promise<Booking | undefined> {
-    const existing = this.bookings.get(id);
-    if (!existing) return undefined;
+		const conflict = await BookingModel.findOne({
+			roomId,
+			_id: excludeBookingId ? { $ne: excludeBookingId } : { $exists: true },
+			$or: [
+				{ startDate: { $lte: end }, endDate: { $gte: start } },
+			],
+		}).lean();
 
-    const updated: Booking = {
-      ...existing,
-      ...updates,
-    };
-    this.bookings.set(id, updated);
-    return updated;
-  }
-
-  async deleteBooking(id: string): Promise<boolean> {
-    return this.bookings.delete(id);
-  }
-
-  async checkBookingConflict(
-    roomId: string, 
-    startDate: string, 
-    endDate: string, 
-    excludeBookingId?: string
-  ): Promise<boolean> {
-    const bookings = Array.from(this.bookings.values());
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    return bookings.some(booking => {
-      if (booking.id === excludeBookingId) return false;
-      if (booking.roomId !== roomId) return false;
-
-      const bookingStart = new Date(booking.startDate);
-      const bookingEnd = new Date(booking.endDate);
-
-      return (start <= bookingEnd && end >= bookingStart);
-    });
-  }
+		return !!conflict;
+	}
 }
 
-export const storage = new MemStorage();
+export const storage = new MongoStorage();

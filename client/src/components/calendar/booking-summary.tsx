@@ -21,7 +21,7 @@ export function BookingSummary({ bookings, rooms, onBookingUpdated }: BookingSum
   const { toast } = useToast();
 
   const roomsMap = rooms.reduce((acc, room) => {
-    acc[room.id] = room;
+    acc[room._id] = room;
     return acc;
   }, {} as Record<string, Room>);
 
@@ -88,15 +88,21 @@ export function BookingSummary({ bookings, rooms, onBookingUpdated }: BookingSum
       <CardContent>
         <div className="space-y-3">
           {bookings.map((booking) => {
-            const room = roomsMap[booking.roomId];
-            const duration = calculateDuration(booking.startDate, booking.endDate);
-            const dateRange = formatDateRange(booking.startDate, booking.endDate);
+            const room = roomsMap[(booking.roomId as any)._id];
+
+            const dateToString = (date: Date) => {
+              return date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate();
+            }
+
+
+            const duration = calculateDuration(dateToString(new Date(booking.startDate)), dateToString(new Date(booking.endDate)));
+            const dateRange = formatDateRange(dateToString(new Date(booking.startDate)), dateToString(new Date(booking.endDate)));
 
             return (
               <div
-                key={booking.id}
+                key={(booking as any)._id}
                 className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
-                data-testid={`booking-summary-${booking.id}`}
+                data-testid={`booking-summary-${booking._id as string}`}
               >
                 <div className="flex items-center space-x-3">
                   <div
@@ -104,10 +110,10 @@ export function BookingSummary({ bookings, rooms, onBookingUpdated }: BookingSum
                     style={{ backgroundColor: room?.color || '#6b7280' }}
                   />
                   <div>
-                    <p className="font-medium text-slate-900" data-testid={`booking-customer-${booking.id}`}>
+                    <p className="font-medium text-slate-900" data-testid={`booking-customer-${booking._id as string}`}>
                       {booking.customerName}
                     </p>
-                    <p className="text-sm text-slate-600" data-testid={`booking-room-${booking.id}`}>
+                    <p className="text-sm text-slate-600" data-testid={`booking-room-${booking._id as string}`}>
                       {room?.name || 'Unknown Room'}
                     </p>
                     {booking.customerEmail && (
@@ -118,7 +124,7 @@ export function BookingSummary({ bookings, rooms, onBookingUpdated }: BookingSum
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-slate-900" data-testid={`booking-dates-${booking.id}`}>
+                  <p className="text-sm font-medium text-slate-900" data-testid={`booking-dates-${booking._id as string}`}>
                     {dateRange}
                   </p>
                   <p className="text-xs text-slate-500">
@@ -137,7 +143,7 @@ export function BookingSummary({ bookings, rooms, onBookingUpdated }: BookingSum
                         description: "Edit functionality will be available soon",
                       });
                     }}
-                    data-testid={`button-edit-${booking.id}`}
+                    data-testid={`button-edit-${booking._id as string}`}
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
@@ -145,9 +151,9 @@ export function BookingSummary({ bookings, rooms, onBookingUpdated }: BookingSum
                     variant="ghost"
                     size="sm"
                     className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                    onClick={() => handleDeleteBooking(booking.id, booking.customerName)}
+                    onClick={() => handleDeleteBooking(booking._id as string, booking.customerName)}
                     disabled={deleteBookingMutation.isPending}
-                    data-testid={`button-delete-${booking.id}`}
+                    data-testid={`button-delete-${booking._id as string}`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
